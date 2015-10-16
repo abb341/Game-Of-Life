@@ -2,79 +2,65 @@ import java.util.Scanner;
 
 public class Simulator {
 
-	final static int NUM_ROWS = 10;
+	final static int NUM_ROWS = 5;
 	final static int NUM_COLS = 10;
-	/*final static int START_ROW = 1;
-	final static int END_ROW = NUM_ROWS - 1;
-	final static int START_COL = 1;
-	final static int END_COL = NUM_COLS - 1;*/
+	final static int MIN_COORD = 1;
+	final static int MAX_XCOORD = NUM_COLS - 2;
+	final static int MAX_YCOORD = NUM_ROWS - 2;
 	static Scanner user = new Scanner(System.in);
 
 	/**
 	 * Class Comment
 	 * @param args
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args)
+	{
+		int[][] grid = new int[NUM_ROWS][NUM_COLS];
 
+		boolean[][] aliveCells = getCoordsForAliveCells();
+		
+		System.out.println("How many generations would you like to simulate?");
+		int numGenerations = user.nextInt();
+
+		performSimulation(grid, aliveCells, numGenerations);
+	}
+	
+	public static boolean[][] getCoordsForAliveCells()
+	{
+		boolean[][] aliveCells = new boolean[NUM_ROWS][NUM_COLS];
 		boolean isDone = false;
-		String input = "";
 		int xCoord;
 		int yCoord;
-		int[][] grid = new int[NUM_ROWS][NUM_COLS];
-		boolean[][] aliveCells = new boolean[NUM_ROWS][NUM_COLS];
-		int numGenerations;
-
+		
+		System.out.println("Enter in coordinates in the form x y. Enter x values between 1 "
+				+ "and " + MAX_XCOORD + " and y values between 1 and " + MAX_YCOORD);
+		
 		while (!isDone)
 		{
-			System.out.println("Enter in a coordinate in the form x,y between (1,1) and (9,9)");
-			input = user.nextLine();
-			xCoord = getXCoord(input);
-			if (xCoord < 0)
+			xCoord = user.nextInt();
+			
+			// Check to see if it is a valid x coord
+			if (xCoord < MIN_COORD || xCoord > MAX_XCOORD)
 			{
 				isDone = true;
 			}
 			else
 			{
-				yCoord = getYCoord(input);
-				aliveCells[xCoord][yCoord] = true;
+				yCoord = user.nextInt();
+				
+				// Check to see if it is a valid y coord
+				if (yCoord < MIN_COORD || yCoord > MAX_YCOORD)
+				{
+					isDone = true;
+				}
+				else
+				{
+					aliveCells[yCoord][xCoord] = true;
+				}
 			}
 		}
-		System.out.println("How many generations would you like to simulate?");
-		numGenerations = Integer.parseInt(user.nextLine());
-
-		performSimulation(grid, aliveCells, numGenerations);
-	}
-
-	public static int getXCoord(String input)
-	{
-		int xCoord;
-		String xCoordStr;
-		if (input.charAt(0) == '-')
-		{
-			xCoordStr = input.substring(0, 2);
-			xCoord = Integer.parseInt(xCoordStr);
-		}
-		else
-		{
-			xCoordStr = input.substring(0, 1);
-			xCoord = Integer.parseInt(xCoordStr);
-		}
-
-
-		System.out.println("Entered xCoord: " + xCoord);
-
-		return xCoord;
-	}
-
-	public static int getYCoord(String input)
-	{
-		char yCoordChar = input.charAt(2);
-		int yCoord = Integer.parseInt("" + yCoordChar);
-
-		System.out.println("Entered yCoord: " + yCoord);
-
-		return yCoord;
-
+		
+		return aliveCells;
 	}
 
 	public static void performSimulation(int[][] grid, boolean[][] aliveCells,
@@ -86,13 +72,13 @@ public class Simulator {
 			// Show the state of the board
 			printGrid(grid, aliveCells);
 			System.out.println();
-			
+
 			// Simulation Logic
-			numNeighbors = getNumNeighbors(numNeighbors, aliveCells);
-			
-			for (int row = 1; row < NUM_ROWS; row++)
+			numNeighbors = getNumNeighbors(aliveCells);
+
+			for (int row = 1; row < NUM_ROWS - 1; row++)
 			{
-				for (int col = 1; col < NUM_COLS; col++)
+				for (int col = 1; col < NUM_COLS - 1; col++)
 				{
 					if (numNeighbors[row][col] == 3)
 					{
@@ -161,26 +147,27 @@ public class Simulator {
 			}
 		}
 	}
-	
-	public static int[][] getNumNeighbors(int[][] numNeighbors, boolean[][] aliveCells)
+
+	public static int[][] getNumNeighbors(boolean[][] aliveCells)
 	{
-		for (int row = 1; row < NUM_ROWS; row++)
+		int[][] numNeighbors = new int[NUM_ROWS][NUM_COLS];
+		for (int row = 1; row < NUM_ROWS - 1; row++)
 		{
-			for (int col = 1; col < NUM_COLS; col++)
+			for (int col = 1; col < NUM_COLS - 1; col++)
 			{
 				int count = 0;
 				count += numNeighborsAbove(row, col, aliveCells);
 				count += numNeighborsBelow(row, col, aliveCells);
 				count += numNeighborsRight(row, col, aliveCells);
 				count += numNeighborsLeft(row, col, aliveCells);
-				
+
 				numNeighbors[row][col] = count;
 			}
 		}
-		
+
 		return numNeighbors;
 	}
-	
+
 	public static int numNeighborsAbove(int row, int col, boolean[][] aliveCells)
 	{
 		int count = 0;
@@ -193,7 +180,7 @@ public class Simulator {
 		}
 		return count;
 	}
-	
+
 	public static int numNeighborsBelow(int row, int col, boolean[][] aliveCells)
 	{
 		int count = 0;
@@ -206,30 +193,28 @@ public class Simulator {
 		}
 		return count;
 	}
-	
+
 	public static int numNeighborsRight(int row, int col, boolean[][] aliveCells)
 	{
 		int count = 0;
-		for (int cell = row - 1; cell <= row + 1; cell++)
+		
+		if (aliveCells[row][col + 1])
 		{
-			if (aliveCells[cell][col + 1])
-			{
-				count++;
-			}
+			count++;
 		}
+		
 		return count;
 	}
-	
+
 	public static int numNeighborsLeft(int row, int col, boolean[][] aliveCells)
 	{
 		int count = 0;
-		for (int cell = row - 1; cell <= row + 1; cell++)
+		
+		if (aliveCells[row][col - 1])
 		{
-			if (aliveCells[cell][col - 1])
-			{
-				count++;
-			}
+			count++;
 		}
+		
 		return count;
 	}
 
