@@ -1,26 +1,15 @@
-import java.awt.Color;
-import java.awt.Graphics;
-
-import javax.swing.JFrame;
-import javax.swing.WindowConstants;
-
 import java.util.Scanner;
 
-public class Simulator extends JFrame {
+public class Simulator {
 
-	final static int NUM_ROWS = 50;
-	final static int NUM_COLS = 50;
+	final static int NUM_ROWS = 30;
+	final static int NUM_COLS = 30;
 	final static int MIN_COORD = 1;
 	final static int MAX_XCOORD = NUM_COLS - 2;
 	final static int MAX_YCOORD = NUM_ROWS - 2;
-	final static int CELL_WIDTH = 10;
-	final static int CELL_HEIGHT = 10;
-	final static int WINDOW_WIDTH = NUM_COLS * CELL_WIDTH;
-	final static int WINDOW_HEIGHT = NUM_ROWS * CELL_HEIGHT;
-	static Simulator window = new Simulator();
-	static boolean[][] aliveCellsToPaint = new boolean[NUM_ROWS][NUM_COLS];
 	static Scanner user = new Scanner(System.in);
-
+	
+	
 	/**
 	 * Class Comment
 	 * @param args
@@ -32,11 +21,6 @@ public class Simulator extends JFrame {
 		System.out.println("How many generations would you like to simulate?");
 		int numGenerations = user.nextInt();
 		
-		//Set up window
-		window.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-		window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		window.setVisible(true);
-
 		performSimulation(aliveCells, numGenerations);
 	}
 	
@@ -90,9 +74,6 @@ public class Simulator extends JFrame {
 		int [][] numNeighbors = new int[NUM_ROWS][NUM_COLS];
 		for (int gen = 0; gen < numGenerations; gen++)
 		{
-			//Update Alive Cells To Paint
-			aliveCellsToPaint = aliveCells;
-			
 			// Show the state of the board
 			printGrid(aliveCells);
 
@@ -120,7 +101,7 @@ public class Simulator extends JFrame {
 					}
 				}
 			}
-			window.repaint();
+//			repaint();
 		}
 	}
 
@@ -242,20 +223,4 @@ public class Simulator extends JFrame {
 		
 		return count;
 	}
-	
-	public void paint (Graphics g)
-	{
-		int xCoord = 0;
-		int yCoord = 0;
-		g.setColor(Color.BLACK);
-		g.fillRect(50, 50, 20, 20);
-		for (int row = 1; row < NUM_ROWS - 1; row++)
-		{
-			for (int col = 1; col < NUM_COLS - 1; col++)
-			{
-				g.drawRect(xCoord * (col - 1), yCoord * (row - 1), CELL_WIDTH, CELL_HEIGHT); 
-			}
-		}
-	}
-
 }
